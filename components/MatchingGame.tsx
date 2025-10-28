@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { VocabularyWord } from '../types';
 
 interface MatchingGameProps {
@@ -7,14 +7,13 @@ interface MatchingGameProps {
 }
 
 interface Card {
-  id: string; // e.g., word.romaji to link pairs
+  id: string;
   content: string;
   type: 'japanese' | 'indonesian';
 }
 
-const GAME_PAIRS = 6; // This means 12 cards in total
+const GAME_PAIRS = 6;
 
-// Helper to shuffle array
 const shuffleArray = <T,>(array: T[]): T[] => {
   return [...array].sort(() => Math.random() - 0.5);
 };
@@ -26,19 +25,15 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
   const [moves, setMoves] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
-  // Function to set up or restart the game
   const setupGame = () => {
-    // 1. Pick random words for the game
     const gameWords = shuffleArray(words).slice(0, GAME_PAIRS);
-    
-    // 2. Create card pairs (Japanese and Indonesian)
+
     const gameCards: Card[] = [];
-    gameWords.forEach(word => {
+    gameWords.forEach((word) => {
       gameCards.push({ id: word.romaji, content: word.japanese, type: 'japanese' });
       gameCards.push({ id: word.romaji, content: word.indonesian, type: 'indonesian' });
     });
-    
-    // 3. Shuffle all cards and reset state
+
     setCards(shuffleArray(gameCards));
     setSelectedIndices([]);
     setMatchedPairs([]);
@@ -46,63 +41,62 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
     setIsFinished(false);
   };
 
-  // Setup the game on initial render
   useEffect(() => {
     setupGame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words]);
 
-  // Game logic to check for matches
   useEffect(() => {
     if (selectedIndices.length !== 2) return;
 
     const [firstIndex, secondIndex] = selectedIndices;
     const firstCard = cards[firstIndex];
     const secondCard = cards[secondIndex];
-    
-    setMoves(m => m + 1);
+
+    setMoves((count) => count + 1);
 
     if (firstCard.id === secondCard.id) {
-      // It's a match!
-      setMatchedPairs(prev => [...prev, firstCard.id]);
+      setMatchedPairs((prev) => [...prev, firstCard.id]);
       setSelectedIndices([]);
     } else {
-      // Not a match, flip back after a delay
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setSelectedIndices([]);
-      }, 1000);
-      return () => clearTimeout(timer);
+      }, 900);
+      return () => window.clearTimeout(timer);
     }
   }, [selectedIndices, cards]);
 
-  // Check if the game is finished
   useEffect(() => {
     if (matchedPairs.length > 0 && matchedPairs.length === GAME_PAIRS) {
-      const timer = setTimeout(() => {
+      const timer = window.setTimeout(() => {
         setIsFinished(true);
-      }, 500); // Short delay before showing finish screen
-      return () => clearTimeout(timer);
+      }, 400);
+      return () => window.clearTimeout(timer);
     }
   }, [matchedPairs]);
 
-  const handleCardClick = (index: number) => {
-    // Prevent clicking if 2 cards are already selected, or card is matched/already selected
-    if (selectedIndices.length >= 2 || matchedPairs.includes(cards[index].id) || selectedIndices.includes(index)) {
-      return;
-    }
-    setSelectedIndices(prev => [...prev, index]);
-  };
+  const progress = Math.round((matchedPairs.length / GAME_PAIRS) * 100);
 
   if (isFinished) {
     return (
-      <div className="text-center p-8 bg-slate-800 rounded-lg shadow-lg border border-slate-700">
-        <h2 className="text-3xl font-bold text-white mb-4">Permainan Selesai!</h2>
-        <p className="text-xl text-cyan-400 mb-6">Kamu menyelesaikannya dalam {moves} langkah.</p>
-        <div className="flex justify-center gap-4">
-          <button onClick={setupGame} className="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105">
-            Main Lagi
+      <div className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 text-center shadow-lg shadow-slate-950/30 sm:p-8">
+        <h2 className="text-3xl font-semibold text-white">Hebat! Semua pasangan berhasil ditemukan!</h2>
+        <p className="text-lg text-cyan-300">Total langkah: {moves}</p>
+        <p className="text-sm text-slate-400">
+          Ulangi permainan untuk memetakan kosa kata lain atau lanjut ke mode kuis berikutnya.
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <button
+            onClick={setupGame}
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:shadow-2xl"
+          >
+            Mainkan Lagi
           </button>
-          <button onClick={onBack} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg transition-transform transform hover:scale-105">
-            Kembali
+          <button
+            onClick={onBack}
+            className="inline-flex items-center justify-center rounded-full border border-slate-700/70 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:border-sky-500/40 hover:text-white"
+          >
+            Kembali ke menu kuis
           </button>
         </div>
       </div>
@@ -110,34 +104,59 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
   }
 
   return (
-    <div className="p-4 md:p-8 bg-slate-800 rounded-lg shadow-lg border border-slate-700 max-w-4xl mx-auto">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h2 className="text-xl font-bold text-cyan-300">Mencocokkan Kata</h2>
-        <div className="text-left sm:text-right">
-          <p className="text-lg font-semibold text-white">Langkah: {moves}</p>
-          <p className="text-md text-slate-400">Cocok: {matchedPairs.length} / {GAME_PAIRS}</p>
+    <div className="space-y-8 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 shadow-lg shadow-slate-950/30 sm:p-8">
+      <header className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-slate-500">Matching Game</span>
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+              Cocokkan pasangan hingga selesai
+            </h2>
+          </div>
+          <div className="text-sm text-slate-400">
+            <p>
+              Langkah: <span className="font-semibold text-cyan-300">{moves}</span>
+            </p>
+            <p>
+              Cocok: <span className="font-semibold text-cyan-300">{matchedPairs.length}</span> / {GAME_PAIRS}
+            </p>
+          </div>
         </div>
-      </div>
-      
-      <div className="grid grid-cols-3 md:grid-cols-4 gap-2 md:gap-4">
+        <div className="relative h-2 overflow-hidden rounded-full bg-slate-800/60">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-violet-500 to-sky-500 transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </header>
+
+      <div className="grid grid-cols-3 gap-2 sm:grid-cols-4 md:gap-3 lg:gap-4">
         {cards.map((card, index) => {
           const isMatched = matchedPairs.includes(card.id);
           const isSelected = selectedIndices.includes(index);
           const isVisible = isMatched || isSelected;
 
-          let buttonClass = 'bg-slate-700 hover:bg-slate-600 transform hover:scale-105 hover:shadow-lg hover:shadow-cyan-500/20';
+          let buttonClass =
+            'border-slate-800/70 bg-slate-950/75 text-slate-100 hover:border-sky-500/40 hover:bg-slate-900/70';
           if (isMatched) {
-            buttonClass = 'bg-green-700 opacity-60 cursor-default';
+            buttonClass = 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-inner shadow-emerald-500/30';
           } else if (isSelected) {
-            buttonClass = 'bg-sky-600 scale-105 shadow-lg shadow-cyan-500/20';
+            buttonClass =
+              'border-sky-500/70 bg-sky-500/25 text-sky-100 shadow-lg shadow-sky-500/20';
           }
 
           return (
             <button
-              key={index}
-              onClick={() => handleCardClick(index)}
+              key={`${card.id}-${index}`}
+              type="button"
+              onClick={() => {
+                if (selectedIndices.length >= 2 || isMatched || selectedIndices.includes(index)) {
+                  return;
+                }
+                setSelectedIndices((prev) => [...prev, index]);
+              }}
               disabled={isMatched || selectedIndices.length === 2}
-              className={`w-full aspect-square p-2 rounded-lg text-white font-semibold transition-all duration-300 flex justify-center items-center text-center text-base sm:text-lg md:text-xl break-all ${buttonClass}`}
+              className={`aspect-square w-full rounded-2xl border px-2 text-center text-sm font-semibold transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${buttonClass}`}
             >
               {isVisible ? card.content : '?'}
             </button>
@@ -145,9 +164,13 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
         })}
       </div>
 
-       <div className="mt-8 text-center">
-        <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors">
-          Keluar dari Permainan
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-sm font-semibold text-slate-400 transition hover:text-white"
+        >
+          Kembali ke menu kuis
         </button>
       </div>
     </div>

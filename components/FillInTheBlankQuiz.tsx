@@ -1,54 +1,68 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { grammarData } from '../data/grammar';
 
 interface FillInTheBlankQuizProps {
   onBack: () => void;
 }
 
+interface FillInTheBlankQuestion {
+  question: string;
+  translation: string;
+  options: string[];
+  answer: string;
+}
+
+const QUIZ_LENGTH = 10;
+
 const shuffleArray = <T,>(array: T[]): T[] => {
   return [...array].sort(() => Math.random() - 0.5);
 };
 
 const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
-  const [questions, setQuestions] = useState<any[]>([]);
+  const [questions, setQuestions] = useState<FillInTheBlankQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isCorrect, setIsCorrect] = useState<boolean | null>(null);
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
-  const QUIZ_LENGTH = 10;
-
   const generateQuestions = useMemo(() => {
     return () => {
-      const particlePoints = grammarData.filter(p => p.part.includes('BAGIAN 1') && p.reading && p.hiragana);
-      const allParticleReadings = particlePoints.map(p => p.reading!);
-      
-      let potentialQuestions: any[] = [];
-      particlePoints.forEach(point => {
-        point.examples.forEach(example => {
-          const particleHiragana = point.hiragana!;
-          const particleReading = point.reading!;
-          // Try to replace particle surrounded by spaces, or at the end of a word (like 5-jiに)
-          // This is a simplified approach and might not catch all edge cases.
-          const questionText = example.japanese.replace(` ${particleHiragana} `, ' [___] ').replace(`${particleHiragana} `, '[___] ');
+      const particlePoints = grammarData.filter((p) => p.part.includes('BAGIAN 1') && p.reading && p.hiragana);
+      const allParticleReadings = particlePoints.map((p) => p.reading as string);
 
-          if (questionText !== example.japanese) { // If a replacement was made
-            const wrongOptions = shuffleArray(allParticleReadings.filter(p => p !== particleReading)).slice(0, 3);
-            const options = shuffleArray([...wrongOptions, particleReading]);
-            
-            potentialQuestions.push({
-              question: questionText,
-              translation: example.translation,
-              options,
-              answer: particleReading
-            });
+      const potentialQuestions: FillInTheBlankQuestion[] = [];
+
+      particlePoints.forEach((point) => {
+        point.examples.forEach((example) => {
+          const particleHiragana = point.hiragana as string;
+          const particleReading = point.reading as string;
+
+          const replaced = example.japanese
+            .replace(` ${particleHiragana} `, ' [___] ')
+            .replace(`${particleHiragana} `, '[___] ')
+            .replace(` ${particleHiragana}`, ' [___]');
+
+          if (replaced === example.japanese) {
+            return;
           }
+
+          const wrongOptions = shuffleArray(allParticleReadings.filter((reading) => reading !== particleReading)).slice(
+            0,
+            3
+          );
+
+          potentialQuestions.push({
+            question: replaced,
+            translation: example.translation,
+            options: shuffleArray([...wrongOptions, particleReading]),
+            answer: particleReading,
+          });
         });
       });
-      
+
       return shuffleArray(potentialQuestions).slice(0, QUIZ_LENGTH);
-    }
+    };
   }, []);
 
   useEffect(() => {
@@ -61,15 +75,17 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
     setSelectedAnswer(option);
     const correct = option === questions[currentQuestionIndex].answer;
     setIsCorrect(correct);
+
     if (correct) {
-      setScore(s => s + 1);
+      setScore((value) => value + 1);
     }
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       setSelectedAnswer(null);
       setIsCorrect(null);
+
       if (currentQuestionIndex < questions.length - 1) {
-        setCurrentQuestionIndex(i => i + 1);
+        setCurrentQuestionIndex((index) => index + 1);
       } else {
         setIsFinished(true);
       }
@@ -86,69 +102,113 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
   };
 
   if (questions.length === 0) {
-    return <div className="text-center p-8">Membuat kuis... Jika tidak muncul, mungkin tidak ada contoh kalimat yang cocok.</div>;
+    return (
+      <div className="rounded-3xl border border-slate-800/70 bg-slate-950/70 p-8 text-center text-slate-300 shadow-lg shadow-slate-950/30">
+        Mengumpulkan kalimat untuk latihan... Coba mode lain jika pesan ini bertahan.
+      </div>
+    );
   }
 
   if (isFinished) {
     return (
-      <div className="text-center p-8 bg-slate-800 rounded-lg shadow-lg border border-slate-700">
-        <h2 className="text-3xl font-bold text-white mb-4">Kuis Selesai!</h2>
-        <p className="text-xl text-cyan-400 mb-6">Skor Akhir Kamu: {score} / {questions.length}</p>
-        <div className="flex justify-center gap-4">
-            <button onClick={restartQuiz} className="bg-sky-600 hover:bg-sky-500 text-white font-bold py-2 px-6 rounded-lg">
-            Ulangi Kuis
-            </button>
-            <button onClick={onBack} className="bg-slate-600 hover:bg-slate-500 text-white font-bold py-2 px-6 rounded-lg">
-            Kembali
-            </button>
+      <div className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 text-center shadow-lg shadow-slate-950/30 sm:p-8">
+        <h2 className="text-3xl font-semibold text-white">Sesi selesai!</h2>
+        <p className="text-lg text-teal-300">
+          Skor kamu <span className="font-bold text-white">{score}</span> dari {questions.length} kalimat.
+        </p>
+        <p className="text-sm text-slate-400">
+          Coba ulangi dengan kombinasi kalimat berbeda atau lanjut menyelesaikan mode kuis lainnya.
+        </p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
+          <button
+            onClick={restartQuiz}
+            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-2xl"
+          >
+            Ulangi sesi ini
+          </button>
+          <button
+            onClick={onBack}
+            className="inline-flex items-center justify-center rounded-full border border-slate-700/70 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:border-sky-500/40 hover:text-white"
+          >
+            Kembali ke menu kuis
+          </button>
         </div>
       </div>
     );
   }
 
   const currentQuestion = questions[currentQuestionIndex];
+  const progress = Math.round((currentQuestionIndex / questions.length) * 100);
 
   const getButtonClass = (option: string) => {
     if (selectedAnswer === null) {
-      return "bg-slate-700 hover:bg-slate-600";
+      return 'border-slate-800/70 bg-slate-950/80 text-slate-100 hover:border-teal-400/40 hover:bg-slate-900/80';
     }
+
     if (option === currentQuestion.answer) {
-      return "bg-green-600";
+      return 'border-emerald-400/70 bg-emerald-500/90 text-slate-950 shadow-lg shadow-emerald-500/30';
     }
+
     if (option === selectedAnswer && !isCorrect) {
-      return "bg-red-600";
+      return 'border-rose-500/70 bg-rose-500/80 text-slate-100 shadow-lg shadow-rose-500/20';
     }
-    return "bg-slate-700 opacity-50";
+
+    return 'border-slate-800/60 bg-slate-950/60 text-slate-500';
   };
 
   return (
-    <div className="p-4 md:p-8 bg-slate-800 rounded-lg shadow-lg border border-slate-700 max-w-2xl mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-xl font-bold text-teal-300">Lengkapi Kalimat</h2>
-        <p className="text-lg font-semibold text-white">{currentQuestionIndex + 1} / {questions.length}</p>
+    <div className="space-y-8 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 shadow-lg shadow-slate-950/30 sm:p-8">
+      <header className="space-y-4">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div>
+            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-slate-500">
+              Lengkapi Kalimat
+            </span>
+            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
+              Pertanyaan {currentQuestionIndex + 1} dari {questions.length}
+            </h2>
+          </div>
+          <p className="text-sm text-slate-400">
+            Skor sementara: <span className="font-semibold text-teal-300">{score}</span>
+          </p>
+        </div>
+        <div className="relative h-2 overflow-hidden rounded-full bg-slate-800/60">
+          <div
+            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
+            style={{ width: `${progress}%` }}
+          />
+        </div>
+      </header>
+
+      <div className="space-y-3 text-center">
+        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Pilih partikel yang tepat</p>
+        <p className="font-mono text-2xl font-semibold text-white sm:text-3xl">{currentQuestion.question}</p>
+        <p className="text-sm italic text-slate-400">&ldquo;{currentQuestion.translation}&rdquo;</p>
       </div>
-      <div className="mb-8 text-center">
-        <p className="text-slate-400 mb-2">Pilih partikel yang tepat:</p>
-        <p className="text-2xl md:text-3xl font-bold text-white font-serif">{currentQuestion.question}</p>
-        <p className="text-slate-400 italic mt-2">"{currentQuestion.translation}"</p>
-      </div>
+
       <div className="grid grid-cols-2 gap-4">
-        {currentQuestion.options.map((option: string, index: number) => (
+        {currentQuestion.options.map((option) => (
           <button
-            key={index}
+            key={option}
+            type="button"
             onClick={() => handleAnswer(option)}
             disabled={selectedAnswer !== null}
-            className={`w-full p-4 rounded-lg text-white font-semibold transition-all duration-300 text-lg md:text-xl ${getButtonClass(option)}`}
+            className={`w-full rounded-xl border px-4 py-4 text-lg font-semibold transition ${getButtonClass(option)}`}
           >
             {option}
           </button>
         ))}
       </div>
-       <div className="mt-8 text-center">
-          <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors">
-            Keluar dari Kuis
-          </button>
-        </div>
+
+      <div className="text-center">
+        <button
+          type="button"
+          onClick={onBack}
+          className="text-sm font-semibold text-slate-400 transition hover:text-white"
+        >
+          Kembali ke menu kuis
+        </button>
+      </div>
     </div>
   );
 };

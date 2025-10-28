@@ -1,7 +1,8 @@
-
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+// Import CSS Tailwind dari folder src agar ikut dibundel saat build produksi
+import './src/index.css';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
