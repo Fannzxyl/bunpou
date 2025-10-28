@@ -109,7 +109,7 @@ const MultipleChoiceQuiz: React.FC<MultipleChoiceQuizProps> = ({ words, onBack }
 
   if (questions.length === 0) {
     return (
-      <div className="rounded-3xl border border-soft bg-surface-soft p-8 text-center text-muted shadow-soft">
+      <div className="rounded-3xl border border-soft bg-surface-soft p-5 text-center text-muted shadow-soft sm:p-8">
         {quizCommon.loading.multipleChoice}
       </div>
     );
@@ -117,7 +117,7 @@ const MultipleChoiceQuiz: React.FC<MultipleChoiceQuizProps> = ({ words, onBack }
 
   if (isFinished) {
     return (
-      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-center text-primary shadow-soft sm:p-8">
+      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-center text-primary shadow-soft sm:p-8">
         <h2 className="text-3xl font-semibold text-strong">{mcCopy.finishedTitle}</h2>
         <p className="text-lg text-strong">
           {t('multipleChoice.finishedSummary', { score, total: QUIZ_LENGTH })}
@@ -161,7 +161,7 @@ const MultipleChoiceQuiz: React.FC<MultipleChoiceQuizProps> = ({ words, onBack }
   };
 
   return (
-    <div className="space-y-8 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
+    <div className="space-y-8 rounded-3xl border border-soft bg-surface-soft p-5 text-primary shadow-soft sm:p-8">
       <header className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>

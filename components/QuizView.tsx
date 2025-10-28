@@ -46,7 +46,7 @@ const QuizView: React.FC = () => {
   }
 
   return (
-    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
+    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-primary shadow-soft sm:p-8">
       <header className="space-y-3 text-left">
         <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">Quiz Hub</span>
         <h2 className="text-2xl font-semibold text-strong sm:text-3xl">{quizCopy.heading}</h2>

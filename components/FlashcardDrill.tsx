@@ -106,7 +106,7 @@ const FlashcardDrill: React.FC<FlashcardDrillProps> = ({ words, onBack }) => {
 
   if (!currentCard && !isFinished) {
     return (
-      <div className="rounded-3xl border border-soft bg-surface-soft p-8 text-center text-muted shadow-soft">
+      <div className="rounded-3xl border border-soft bg-surface-soft p-5 text-center text-muted shadow-soft sm:p-8">
         {quizCommon.loading.flashcards}
       </div>
     );
@@ -114,7 +114,7 @@ const FlashcardDrill: React.FC<FlashcardDrillProps> = ({ words, onBack }) => {
 
   if (isFinished) {
     return (
-      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-center text-primary shadow-soft sm:p-8">
+      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-center text-primary shadow-soft sm:p-8">
         <h2 className="text-3xl font-semibold text-strong">{flashCopy.finishedTitle}</h2>
         <p className="text-lg text-strong">
           {t('flashcards.finishedSummary', { remembered: rememberedCount, retry: retryCount })}
@@ -138,7 +138,7 @@ const FlashcardDrill: React.FC<FlashcardDrillProps> = ({ words, onBack }) => {
   }
 
   return (
-    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
+    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-primary shadow-soft sm:p-8">
       <header className="space-y-3 text-left">
         <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">{flashCopy.title}</span>
         <h2 className="text-2xl font-semibold text-strong sm:text-3xl">

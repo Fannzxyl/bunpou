@@ -86,7 +86,7 @@ const TypingDrill: React.FC<TypingDrillProps> = ({ words, onBack }) => {
 
   if (!currentPrompt && !isFinished) {
     return (
-      <div className="rounded-3xl border border-soft bg-surface-soft p-8 text-center text-muted shadow-soft">
+      <div className="rounded-3xl border border-soft bg-surface-soft p-5 text-center text-muted shadow-soft sm:p-8">
         {quizCommon.loading.typing}
       </div>
     );
@@ -94,7 +94,7 @@ const TypingDrill: React.FC<TypingDrillProps> = ({ words, onBack }) => {
 
   if (isFinished) {
     return (
-      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-center text-primary shadow-soft sm:p-8">
+      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-center text-primary shadow-soft sm:p-8">
         <h2 className="text-3xl font-semibold text-strong">{typingCopy.finishedTitle}</h2>
         <p className="text-lg text-strong">{t('typing.finishedSummary', { score, total: prompts.length })}</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
@@ -116,7 +116,7 @@ const TypingDrill: React.FC<TypingDrillProps> = ({ words, onBack }) => {
   }
 
   return (
-    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
+    <section className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-5 text-primary shadow-soft sm:p-8">
       <header className="space-y-3 text-left">
         <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">{typingCopy.title}</span>
         <h2 className="text-2xl font-semibold text-strong sm:text-3xl">

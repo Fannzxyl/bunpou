@@ -13,15 +13,15 @@ function App() {
     <div className="relative min-h-screen overflow-hidden font-sans text-primary">
       <div className="pointer-events-none absolute inset-0 -z-10 overflow-hidden">
         <div
-          className="absolute -top-32 right-10 h-80 w-80 rounded-full blur-3xl opacity-30 sm:h-[26rem] sm:w-[26rem]"
+          className="hidden sm:block absolute -top-32 right-10 h-80 w-80 rounded-full blur-3xl opacity-30 sm:h-[26rem] sm:w-[26rem]"
           style={{ background: 'var(--accent)' }}
         />
         <div
-          className="absolute bottom-[-6rem] left-[12%] h-72 w-72 rounded-full blur-3xl opacity-25 sm:h-[22rem] sm:w-[22rem]"
+          className="hidden sm:block absolute bottom-[-6rem] left-[12%] h-72 w-72 rounded-full blur-3xl opacity-25 sm:h-[22rem] sm:w-[22rem]"
           style={{ background: 'var(--accent-soft)' }}
         />
         <div
-          className="absolute inset-x-0 top-1/2 h-64 scale-150 blur-3xl opacity-20"
+          className="hidden sm:block absolute inset-x-0 top-1/2 h-64 scale-150 blur-3xl opacity-20"
           style={{ background: 'linear-gradient(90deg, transparent, var(--accent), transparent)' }}
         />
       </div>
@@ -29,7 +29,7 @@ function App() {
       <Header />
 
       <main className="relative z-10 mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 pb-16 sm:px-6 lg:px-8">
-        <section className="grid gap-4 text-sm leading-relaxed text-muted sm:grid-cols-2 lg:grid-cols-3">
+        <section className="grid gap-6 text-sm leading-relaxed text-muted sm:grid-cols-2 lg:grid-cols-3 sm:gap-4">
           {steps.map((step: { badge: string; title: string; description: string }) => (
             <article key={step.badge} className="glass-panel p-6 transition duration-500 hover:-translate-y-1 hover:shadow-soft">
               <p className="text-xs font-semibold uppercase tracking-[0.35em] text-muted">{step.badge}</p>

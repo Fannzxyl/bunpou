@@ -242,7 +242,7 @@ const Tabs: React.FC = () => {
           </dl>
         </header>
 
-        <nav className="flex flex-wrap items-center gap-3" aria-label="Tab Navigasi" role="tablist">
+        <nav className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center" aria-label="Tab Navigasi" role="tablist">
           {(Object.keys(tabMeta) as Tab[]).map((tab) => {
             const isActive = activeTab === tab;
             return (
@@ -252,7 +252,7 @@ const Tabs: React.FC = () => {
                 role="tab"
                 aria-selected={isActive}
                 aria-controls="tab-content"
-                className={`pill-button flex items-center gap-3 transition ${isActive ? 'pill-button--active' : ''}`}
+                className={`pill-button flex items-center gap-3 transition w-full sm:w-auto ${isActive ? 'pill-button--active' : ''}`}
                 onClick={() => handleTabChange(tab)}
               >
                 <span className={`text-lg font-semibold ${isActive ? 'text-inverse' : 'text-strong'}`}>

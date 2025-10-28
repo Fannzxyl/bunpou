@@ -87,10 +87,11 @@
 
 @layer components {
   .glass-panel {
-    @apply rounded-3xl backdrop-blur-2xl transition-colors duration-300;
+    @apply rounded-3xl transition-colors duration-300;
     background-color: var(--surface);
     border: 1px solid var(--border-soft);
     box-shadow: var(--shadow-soft);
+    backdrop-filter: blur(24px);
   }
 
   .pill-button {
@@ -161,6 +162,43 @@
 
   .shadow-soft {
     box-shadow: var(--shadow-soft);
+  }
+}
+
+@media (max-width: 640px) {
+  body {
+    background-attachment: scroll;
+    background-image: radial-gradient(circle at 40% 20%, var(--bg-accent-1), transparent 55%),
+      radial-gradient(circle at 80% 70%, var(--bg-accent-2), transparent 60%);
+  }
+
+  .glass-panel {
+    border-radius: 1.25rem;
+    padding: 1.25rem 1rem;
+    box-shadow: 0 18px 40px rgba(15, 23, 42, 0.28);
+    backdrop-filter: blur(14px);
+  }
+
+  .pill-button {
+    padding: 0.5rem 1rem;
+    letter-spacing: 0.18em;
+  }
+
+  .vocab-card {
+    min-height: 10.5rem;
+    padding: 0.75rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel,
+  .pill-button,
+  .vocab-card {
+    transition-duration: 150ms;
+  }
+
+  .vocab-card > div {
+    transition-duration: 150ms;
   }
 }
 
