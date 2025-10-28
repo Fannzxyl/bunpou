@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { grammarData } from '../data/grammar';
+import { useTranslation } from '../src/i18n';
 
 interface FillInTheBlankQuizProps {
   onBack: () => void;
@@ -26,6 +27,28 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
   const [score, setScore] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
 
+  const { t, get } = useTranslation();
+  const quizCommon = get<{
+    loading: {
+      multipleChoice: string;
+      matching: string;
+      fillBlank: string;
+      flashcards: string;
+      typing: string;
+    };
+    backToMenu: string;
+    restart: string;
+    scorePrefix: string;
+    progressPrefix: string;
+  }>('quizCommon');
+  const fillCopy = get<{
+    title: string;
+    instruction: string;
+    loading: string;
+    finishedTitle: string;
+    finishedSummary: string;
+    prompt: string;
+  }>('fillBlank');
   const generateQuestions = useMemo(() => {
     return () => {
       const particlePoints = grammarData.filter((p) => p.part.includes('BAGIAN 1') && p.reading && p.hiragana);
@@ -103,34 +126,29 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
 
   if (questions.length === 0) {
     return (
-      <div className="rounded-3xl border border-slate-800/70 bg-slate-950/70 p-8 text-center text-slate-300 shadow-lg shadow-slate-950/30">
-        Mengumpulkan kalimat untuk latihan... Coba mode lain jika pesan ini bertahan.
+      <div className="rounded-3xl border border-soft bg-surface-soft p-8 text-center text-muted shadow-soft">
+        {fillCopy.loading}
       </div>
     );
   }
 
   if (isFinished) {
     return (
-      <div className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 text-center shadow-lg shadow-slate-950/30 sm:p-8">
-        <h2 className="text-3xl font-semibold text-white">Sesi selesai!</h2>
-        <p className="text-lg text-teal-300">
-          Skor kamu <span className="font-bold text-white">{score}</span> dari {questions.length} kalimat.
-        </p>
-        <p className="text-sm text-slate-400">
-          Coba ulangi dengan kombinasi kalimat berbeda atau lanjut menyelesaikan mode kuis lainnya.
-        </p>
+      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-center text-primary shadow-soft sm:p-8">
+        <h2 className="text-3xl font-semibold text-strong">{fillCopy.finishedTitle}</h2>
+        <p className="text-lg text-strong">{t('fillBlank.finishedSummary', { score, total: questions.length })}</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             onClick={restartQuiz}
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 px-6 py-3 text-sm font-semibold text-slate-950 shadow-lg shadow-emerald-500/30 transition hover:shadow-2xl"
+            className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-inverse shadow-soft transition hover:opacity-95"
           >
-            Ulangi sesi ini
+            {quizCommon.restart}
           </button>
           <button
             onClick={onBack}
-            className="inline-flex items-center justify-center rounded-full border border-slate-700/70 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:border-sky-500/40 hover:text-white"
+            className="inline-flex items-center justify-center rounded-full border border-soft px-6 py-3 text-sm font-semibold text-muted transition hover:border-strong hover:text-primary"
           >
-            Kembali ke menu kuis
+            {quizCommon.backToMenu}
           </button>
         </div>
       </div>
@@ -142,48 +160,47 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
 
   const getButtonClass = (option: string) => {
     if (selectedAnswer === null) {
-      return 'border-slate-800/70 bg-slate-950/80 text-slate-100 hover:border-teal-400/40 hover:bg-slate-900/80';
+      return 'border border-soft bg-surface text-primary hover:border-strong hover:bg-surface-soft';
     }
 
     if (option === currentQuestion.answer) {
-      return 'border-emerald-400/70 bg-emerald-500/90 text-slate-950 shadow-lg shadow-emerald-500/30';
+      return 'border border-emerald-400 bg-emerald-400/90 text-inverse shadow-soft';
     }
 
     if (option === selectedAnswer && !isCorrect) {
-      return 'border-rose-500/70 bg-rose-500/80 text-slate-100 shadow-lg shadow-rose-500/20';
+      return 'border border-rose-500 bg-rose-500/80 text-inverse shadow-soft';
     }
 
-    return 'border-slate-800/60 bg-slate-950/60 text-slate-500';
+    return 'border border-soft bg-surface-soft text-muted';
   };
 
   return (
-    <div className="space-y-8 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 shadow-lg shadow-slate-950/30 sm:p-8">
+    <div className="space-y-8 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
       <header className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-slate-500">
-              Lengkapi Kalimat
-            </span>
-            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-              Pertanyaan {currentQuestionIndex + 1} dari {questions.length}
+            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">{fillCopy.title}</span>
+            <h2 className="text-2xl font-semibold text-strong sm:text-3xl">
+              {t('quizCommon.progressPrefix', { current: currentQuestionIndex + 1, total: questions.length })}
             </h2>
           </div>
-          <p className="text-sm text-slate-400">
-            Skor sementara: <span className="font-semibold text-teal-300">{score}</span>
+          <p className="text-sm text-muted">
+            {quizCommon.scorePrefix}: <span className="font-semibold text-strong">{score}</span>
           </p>
         </div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-slate-800/60">
+        <div className="relative h-2 overflow-hidden rounded-full bg-surface">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-emerald-500 to-teal-400 transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+            style={{ width: `${progress}%`, background: 'linear-gradient(90deg, var(--accent), var(--accent-soft))' }}
           />
         </div>
       </header>
 
       <div className="space-y-3 text-center">
-        <p className="text-sm uppercase tracking-[0.3em] text-slate-500">Pilih partikel yang tepat</p>
-        <p className="font-mono text-2xl font-semibold text-white sm:text-3xl">{currentQuestion.question}</p>
-        <p className="text-sm italic text-slate-400">&ldquo;{currentQuestion.translation}&rdquo;</p>
+        <p className="text-sm uppercase tracking-[0.3em] text-muted">{fillCopy.prompt}</p>
+        <p className="text-xs text-muted">{fillCopy.instruction}</p>
+        <p className="font-mono text-2xl font-semibold text-strong sm:text-3xl">{currentQuestion.question}</p>
+        <p className="text-sm italic text-muted">&ldquo;{currentQuestion.translation}&rdquo;</p>
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -193,7 +210,7 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
             type="button"
             onClick={() => handleAnswer(option)}
             disabled={selectedAnswer !== null}
-            className={`w-full rounded-xl border px-4 py-4 text-lg font-semibold transition ${getButtonClass(option)}`}
+            className={`w-full rounded-xl px-4 py-4 text-lg font-semibold transition ${getButtonClass(option)}`}
           >
             {option}
           </button>
@@ -204,9 +221,9 @@ const FillInTheBlankQuiz: React.FC<FillInTheBlankQuizProps> = ({ onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="text-sm font-semibold text-slate-400 transition hover:text-white"
+          className="text-sm font-semibold text-muted transition hover:text-primary"
         >
-          Kembali ke menu kuis
+          {quizCommon.backToMenu}
         </button>
       </div>
     </div>

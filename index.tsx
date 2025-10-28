@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
-// Import CSS Tailwind dari folder src agar ikut dibundel saat build produksi
+import { SettingsProvider } from './context/SettingsContext';
 import './src/index.css';
 
 const rootElement = document.getElementById('root');
@@ -12,6 +12,8 @@ if (!rootElement) {
 const root = ReactDOM.createRoot(rootElement);
 root.render(
   <React.StrictMode>
-    <App />
+    <SettingsProvider>
+      <App />
+    </SettingsProvider>
   </React.StrictMode>
 );

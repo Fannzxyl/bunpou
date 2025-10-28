@@ -5,8 +5,21 @@ import GrammarCard from './GrammarCard';
 import VocabularyCard from './VocabularyCard';
 import QuizView from './QuizView';
 import type { VocabularyWord } from '../types';
+import { useTranslation } from '../src/i18n';
 
 type Tab = 'grammar' | 'vocabulary' | 'quiz';
+
+type TabsCopy = {
+  sectionLabel: string;
+  searchPlaceholder: string;
+  searchHelp: string;
+  reset: string;
+  noResultsTitle: string;
+  noResultsBody: string;
+  countLabel: string;
+  stats: Array<{ label: string; detail: string }>;
+  tabs: Record<Tab, { badge: string; label: string; heading: string; description: string }>;
+};
 
 const tabHash: Record<Tab, string> = {
   grammar: 'materi',
@@ -14,37 +27,12 @@ const tabHash: Record<Tab, string> = {
   quiz: 'kuis',
 };
 
-const tabMeta: Record<
-  Tab,
-  {
-    badge: string;
-    label: string;
-    heading: string;
-    description: string;
-  }
-> = {
-  grammar: {
-    badge: 'G',
-    label: 'Grammar',
-    heading: 'Tata Bahasa Inti untuk Ujian',
-    description: 'Buka kartu interaktif untuk memahami fungsi partikel, pola kalimat, dan contoh penerapan langsung.',
-  },
-  vocabulary: {
-    badge: 'V',
-    label: 'Vocabulary',
-    heading: 'Kelola Kosakata Tematik',
-    description: 'Filter berdasarkan kategori, cari lewat romaji maupun arti, lalu hafalkan dengan kartu beranimasi.',
-  },
-  quiz: {
-    badge: 'Q',
-    label: 'Quiz',
-    heading: 'Latihan Interaktif & Gamified',
-    description:
-      'Uji pemahaman dengan pilihan ganda, permainan mencocokkan, serta latihan isi rumpang untuk menguatkan memori.',
-  },
-};
-
 const Tabs: React.FC = () => {
+  const { get, t } = useTranslation();
+  const tabCopy = get<TabsCopy>('tabs');
+  const tabMeta = tabCopy.tabs;
+  const quizModes = get<Array<{ id: string }>>('quizMenu.modes');
+
   const [activeTab, setActiveTab] = useState<Tab>('grammar');
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -80,26 +68,14 @@ const Tabs: React.FC = () => {
   const vocabularyCategoryCount = useMemo(() => Object.keys(groupedVocabulary).length, [groupedVocabulary]);
   const totalVocabulary = useMemo(() => vocabularyData.length, []);
 
-  const highlightStats = useMemo(
-    () => [
-      {
-        label: 'Kategori',
-        value: vocabularyCategoryCount,
-        detail: 'Tema belajar paling sering keluar di TKA.',
-      },
-      {
-        label: 'Kartu Kosakata',
-        value: totalVocabulary,
-        detail: 'Tap kartu untuk membuka arti & latihan kilat.',
-      },
-      {
-        label: 'Mode Kuis',
-        value: 3,
-        detail: 'Pilihan ganda, matching game, & isi rumpang.',
-      },
-    ],
-    [totalVocabulary, vocabularyCategoryCount]
-  );
+  const highlightStats = useMemo(() => {
+    const stats = tabCopy.stats;
+    return stats.map((stat, index) => ({
+      label: stat.label,
+      detail: stat.detail,
+      value: index === 0 ? vocabularyCategoryCount : index === 1 ? totalVocabulary : quizModes.length,
+    }));
+  }, [tabCopy.stats, vocabularyCategoryCount, totalVocabulary, quizModes.length]);
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
@@ -186,23 +162,23 @@ const Tabs: React.FC = () => {
                   <input
                     id="search"
                     type="search"
-                    placeholder="Cari romaji, kana, atau arti bahasa Indonesia..."
+                    placeholder={tabCopy.searchPlaceholder}
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    className="w-full rounded-xl border border-slate-800 bg-slate-950/80 py-3 pl-12 pr-16 text-sm text-slate-100 placeholder-slate-500 focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-500/40"
+                    className="w-full rounded-xl border border-soft bg-surface-soft py-3 pl-12 pr-16 text-sm text-primary placeholder:text-muted focus:border-strong focus:outline-none focus:ring-2 focus:ring-[color:var(--accent)]"
                   />
                   {searchTerm && (
                     <button
                       type="button"
                       onClick={() => setSearchTerm('')}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-slate-800/90 px-3 py-1 text-xs font-semibold text-slate-300 transition hover:bg-slate-700 hover:text-white"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-surface px-3 py-1 text-xs font-semibold text-muted transition hover:text-primary"
                     >
-                      Reset
+                      {tabCopy.reset}
                     </button>
                   )}
                 </div>
-                <p className="mt-3 text-xs text-slate-500">
-                  Tips: kombinasikan pencarian dengan kategori untuk fokus ke tema tertentu.
+                <p className="mt-3 text-xs text-muted">
+                  {tabCopy.searchHelp}
                 </p>
               </div>
             </div>
@@ -213,8 +189,8 @@ const Tabs: React.FC = () => {
                   <section key={category} aria-label={category} className="space-y-5">
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                       <div>
-                        <h2 className="text-xl font-semibold text-cyan-300">{category}</h2>
-                        <p className="text-sm text-slate-400">Jumlah kartu: {words.length}</p>
+                        <h2 className="text-xl font-semibold text-strong">{category}</h2>
+                        <p className="text-sm text-muted">{t('tabs.countLabel', { count: words.length })}</p>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -226,11 +202,9 @@ const Tabs: React.FC = () => {
                 ))}
               </div>
             ) : (
-              <div className="rounded-2xl border border-slate-800/70 bg-slate-950/70 p-8 text-center text-slate-400">
-                <p className="text-lg font-semibold text-slate-200">Tidak ada hasil yang cocok.</p>
-                <p className="mt-2 text-sm">
-                  Coba gunakan kata kunci lain atau bersihkan pencarian untuk melihat semua kategori.
-                </p>
+              <div className="rounded-2xl border border-soft bg-surface-soft p-8 text-center text-muted">
+                <p className="text-lg font-semibold text-strong">{tabCopy.noResultsTitle}</p>
+                <p className="mt-2 text-sm">{tabCopy.noResultsBody}</p>
               </div>
             )}
           </div>
@@ -249,23 +223,20 @@ const Tabs: React.FC = () => {
         <div id="kuis" className="sr-only" aria-hidden="true" />
         <header className="flex flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
           <div className="space-y-3">
-            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-slate-500">
-              Mode Pembelajaran
+            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">
+              {tabCopy.sectionLabel}
             </span>
-            <h2 className="text-2xl font-semibold text-white sm:text-3xl">{tabMeta[activeTab].heading}</h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-slate-400 sm:text-base">
+            <h2 className="text-2xl font-semibold text-strong sm:text-3xl">{tabMeta[activeTab].heading}</h2>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted sm:text-base">
               {tabMeta[activeTab].description}
             </p>
           </div>
-          <dl className="grid w-full gap-3 text-center text-sm text-slate-300 sm:grid-cols-3 lg:w-auto">
+          <dl className="grid w-full gap-3 text-center text-sm text-muted sm:grid-cols-3 lg:w-auto">
             {highlightStats.map((stat) => (
-              <div
-                key={stat.label}
-                className="rounded-2xl border border-slate-800/60 bg-slate-950/70 px-5 py-4 shadow-inner shadow-slate-950/30"
-              >
-                <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-slate-500">{stat.label}</dt>
-                <dd className="mt-2 text-2xl font-semibold text-sky-300">{stat.value}</dd>
-                <dd className="mt-2 text-[0.7rem] leading-relaxed text-slate-500">{stat.detail}</dd>
+              <div key={stat.label} className="rounded-2xl border border-soft bg-surface-soft px-5 py-4">
+                <dt className="text-[0.65rem] uppercase tracking-[0.3em] text-muted">{stat.label}</dt>
+                <dd className="mt-2 text-2xl font-semibold text-strong">{stat.value}</dd>
+                <dd className="mt-2 text-[0.7rem] leading-relaxed text-muted">{stat.detail}</dd>
               </div>
             ))}
           </dl>
@@ -284,10 +255,14 @@ const Tabs: React.FC = () => {
                 className={`pill-button flex items-center gap-3 transition ${isActive ? 'pill-button--active' : ''}`}
                 onClick={() => handleTabChange(tab)}
               >
-                <span className={`text-lg font-semibold ${isActive ? 'text-slate-900' : 'text-slate-200'}`}>
+                <span className={`text-lg font-semibold ${isActive ? 'text-inverse' : 'text-strong'}`}>
                   {tabMeta[tab].badge}
                 </span>
-                <span className={`text-xs tracking-[0.3em] uppercase ${isActive ? 'text-slate-900/70' : 'text-slate-500'}`}>
+                <span
+                  className={`text-xs tracking-[0.3em] uppercase ${
+                    isActive ? 'text-inverse opacity-80' : 'text-muted'
+                  }`}
+                >
                   {tabMeta[tab].label}
                 </span>
               </button>

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { VocabularyWord } from '../types';
+import { useTranslation } from '../src/i18n';
 
 interface MatchingGameProps {
   words: VocabularyWord[];
@@ -24,6 +25,28 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
   const [matchedPairs, setMatchedPairs] = useState<string[]>([]);
   const [moves, setMoves] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
+  const { t, get } = useTranslation();
+  const quizCommon = get<{
+    loading: {
+      multipleChoice: string;
+      matching: string;
+      fillBlank: string;
+      flashcards: string;
+      typing: string;
+    };
+    backToMenu: string;
+    restart: string;
+    scorePrefix: string;
+    progressPrefix: string;
+  }>('quizCommon');
+  const matchingCopy = get<{
+    title: string;
+    subtitle: string;
+    finishedTitle: string;
+    finishedSummary: string;
+    stepsLabel: string;
+    matchesLabel: string;
+  }>('matchingGame');
 
   const setupGame = () => {
     const gameWords = shuffleArray(words).slice(0, GAME_PAIRS);
@@ -79,24 +102,21 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
 
   if (isFinished) {
     return (
-      <div className="space-y-6 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 text-center shadow-lg shadow-slate-950/30 sm:p-8">
-        <h2 className="text-3xl font-semibold text-white">Hebat! Semua pasangan berhasil ditemukan!</h2>
-        <p className="text-lg text-cyan-300">Total langkah: {moves}</p>
-        <p className="text-sm text-slate-400">
-          Ulangi permainan untuk memetakan kosa kata lain atau lanjut ke mode kuis berikutnya.
-        </p>
+      <div className="space-y-6 rounded-3xl border border-soft bg-surface-soft p-6 text-center text-primary shadow-soft sm:p-8">
+        <h2 className="text-3xl font-semibold text-strong">{matchingCopy.finishedTitle}</h2>
+        <p className="text-lg text-strong">{t('matchingGame.finishedSummary', { moves })}</p>
         <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
           <button
             onClick={setupGame}
-            className="inline-flex items-center justify-center rounded-full bg-gradient-to-r from-violet-500 to-sky-500 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-violet-500/30 transition hover:shadow-2xl"
+            className="inline-flex items-center justify-center rounded-full bg-accent px-6 py-3 text-sm font-semibold text-inverse shadow-soft transition hover:opacity-95"
           >
-            Mainkan Lagi
+            {quizCommon.restart}
           </button>
           <button
             onClick={onBack}
-            className="inline-flex items-center justify-center rounded-full border border-slate-700/70 px-6 py-3 text-sm font-semibold text-slate-300 transition hover:border-sky-500/40 hover:text-white"
+            className="inline-flex items-center justify-center rounded-full border border-soft px-6 py-3 text-sm font-semibold text-muted transition hover:border-strong hover:text-primary"
           >
-            Kembali ke menu kuis
+            {quizCommon.backToMenu}
           </button>
         </div>
       </div>
@@ -104,28 +124,29 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
   }
 
   return (
-    <div className="space-y-8 rounded-3xl border border-slate-800/70 bg-slate-950/70 p-6 shadow-lg shadow-slate-950/30 sm:p-8">
+    <div className="space-y-8 rounded-3xl border border-soft bg-surface-soft p-6 text-primary shadow-soft sm:p-8">
       <header className="space-y-4">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
-            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-slate-500">Matching Game</span>
-            <h2 className="text-2xl font-semibold text-white sm:text-3xl">
-              Cocokkan pasangan hingga selesai
-            </h2>
+            <span className="text-xs font-semibold uppercase tracking-[0.38em] text-muted">{matchingCopy.title}</span>
+            <h2 className="text-2xl font-semibold text-strong sm:text-3xl">{matchingCopy.subtitle}</h2>
           </div>
-          <div className="text-sm text-slate-400">
+          <div className="text-sm text-muted">
             <p>
-              Langkah: <span className="font-semibold text-cyan-300">{moves}</span>
+              {matchingCopy.stepsLabel}: <span className="font-semibold text-strong">{moves}</span>
             </p>
             <p>
-              Cocok: <span className="font-semibold text-cyan-300">{matchedPairs.length}</span> / {GAME_PAIRS}
+              {matchingCopy.matchesLabel}: <span className="font-semibold text-strong">{matchedPairs.length}</span> / {GAME_PAIRS}
             </p>
           </div>
         </div>
-        <div className="relative h-2 overflow-hidden rounded-full bg-slate-800/60">
+        <div className="relative h-2 overflow-hidden rounded-full bg-surface">
           <div
-            className="absolute inset-y-0 left-0 rounded-full bg-gradient-to-r from-violet-500 to-sky-500 transition-all duration-500"
-            style={{ width: `${progress}%` }}
+            className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
+            style={{
+              width: `${progress}%`,
+              background: 'linear-gradient(90deg, var(--accent), var(--accent-soft))',
+            }}
           />
         </div>
       </header>
@@ -137,13 +158,18 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
           const isVisible = isMatched || isSelected;
 
           let buttonClass =
-            'border-slate-800/70 bg-slate-950/75 text-slate-100 hover:border-sky-500/40 hover:bg-slate-900/70';
+            'border border-soft bg-surface text-primary transition hover:border-strong hover:bg-surface-soft';
+          const buttonStyle: React.CSSProperties = {};
           if (isMatched) {
-            buttonClass = 'border-emerald-500/60 bg-emerald-500/20 text-emerald-200 shadow-inner shadow-emerald-500/30';
+            buttonClass = 'border border-emerald-400 bg-emerald-400/20 text-strong shadow-soft';
+            buttonStyle.backgroundColor = 'rgba(34, 197, 94, 0.2)';
           } else if (isSelected) {
-            buttonClass =
-              'border-sky-500/70 bg-sky-500/25 text-sky-100 shadow-lg shadow-sky-500/20';
+            buttonClass = 'border bg-accent-soft text-strong shadow-soft';
+            buttonStyle.borderColor = 'var(--accent)';
+            buttonStyle.backgroundColor = 'var(--accent-soft)';
           }
+
+          const displayValue = isVisible ? card.content : '?';
 
           return (
             <button
@@ -156,9 +182,10 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
                 setSelectedIndices((prev) => [...prev, index]);
               }}
               disabled={isMatched || selectedIndices.length === 2}
-              className={`aspect-square w-full rounded-2xl border px-2 text-center text-sm font-semibold transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/40 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950 ${buttonClass}`}
+              className={`aspect-square w-full rounded-2xl px-2 text-center text-sm font-semibold transition-all duration-300 hover:-translate-y-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--accent)] focus-visible:ring-offset-2 ${buttonClass}`}
+              style={buttonStyle}
             >
-              {isVisible ? card.content : '?'}
+              {displayValue}
             </button>
           );
         })}
@@ -168,9 +195,9 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
         <button
           type="button"
           onClick={onBack}
-          className="text-sm font-semibold text-slate-400 transition hover:text-white"
+          className="text-sm font-semibold text-muted transition hover:text-primary"
         >
-          Kembali ke menu kuis
+          {quizCommon.backToMenu}
         </button>
       </div>
     </div>
@@ -178,3 +205,4 @@ const MatchingGame: React.FC<MatchingGameProps> = ({ words, onBack }) => {
 };
 
 export default MatchingGame;
+

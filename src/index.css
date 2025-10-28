@@ -1,35 +1,167 @@
-/* src/index.css */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bg-root: #101826;
+    --bg-accent-1: rgba(56, 189, 248, 0.18);
+    --bg-accent-2: rgba(14, 165, 233, 0.16);
+    --bg-accent-3: rgba(45, 212, 191, 0.12);
+    --surface: rgba(16, 24, 39, 0.78);
+    --surface-soft: rgba(15, 23, 42, 0.6);
+    --surface-strong: rgba(30, 41, 59, 0.85);
+    --border-soft: rgba(148, 163, 184, 0.28);
+    --border-strong: rgba(148, 163, 184, 0.42);
+    --shadow-soft: 0 40px 90px rgba(15, 23, 42, 0.45);
+    --glass-blur: 26px;
+    --text-primary: #f8fafc;
+    --text-strong: #e2e8f0;
+    --text-muted: #94a3b8;
+    --text-inverse: #0f172a;
+    --accent: #38bdf8;
+    --accent-soft: #2dd4bf;
+    --accent-strong: #0ea5e9;
+    --pill-hover: rgba(148, 163, 184, 0.25);
+  }
+
+  [data-theme='daylight'] {
+    --bg-root: #f2f6ff;
+    --bg-accent-1: rgba(59, 130, 246, 0.18);
+    --bg-accent-2: rgba(56, 189, 248, 0.16);
+    --bg-accent-3: rgba(45, 212, 191, 0.14);
+    --surface: rgba(255, 255, 255, 0.92);
+    --surface-soft: rgba(255, 255, 255, 0.82);
+    --surface-strong: rgba(236, 245, 255, 0.95);
+    --border-soft: rgba(148, 163, 184, 0.22);
+    --border-strong: rgba(148, 163, 184, 0.36);
+    --shadow-soft: 0 32px 80px rgba(15, 23, 42, 0.18);
+    --text-primary: #0f172a;
+    --text-strong: #1e293b;
+    --text-muted: #64748b;
+    --text-inverse: #ffffff;
+    --accent: #2563eb;
+    --accent-soft: #38bdf8;
+    --accent-strong: #1d4ed8;
+    --pill-hover: rgba(148, 163, 184, 0.2);
+  }
+
+  [data-theme='sakura'] {
+    --bg-root: #fef4f8;
+    --bg-accent-1: rgba(251, 113, 133, 0.22);
+    --bg-accent-2: rgba(244, 114, 182, 0.18);
+    --bg-accent-3: rgba(196, 181, 253, 0.16);
+    --surface: rgba(255, 255, 255, 0.9);
+    --surface-soft: rgba(254, 226, 238, 0.78);
+    --surface-strong: rgba(252, 231, 243, 0.92);
+    --border-soft: rgba(244, 114, 182, 0.28);
+    --border-strong: rgba(244, 114, 182, 0.42);
+    --shadow-soft: 0 28px 70px rgba(219, 39, 119, 0.25);
+    --text-primary: #4a1d45;
+    --text-strong: #5b2a52;
+    --text-muted: rgba(90, 54, 82, 0.75);
+    --text-inverse: #ffffff;
+    --accent: #ec4899;
+    --accent-soft: #f472b6;
+    --accent-strong: #db2777;
+    --pill-hover: rgba(244, 114, 182, 0.25);
+  }
+
   body {
-    @apply bg-slate-950 text-slate-100 antialiased;
+    @apply antialiased;
+    color: var(--text-primary);
+    background-color: var(--bg-root);
     background-image:
-      radial-gradient(circle at 20% 20%, rgba(56, 189, 248, 0.18), transparent 55%),
-      radial-gradient(circle at 80% -10%, rgba(14, 165, 233, 0.16), transparent 55%),
-      radial-gradient(circle at 50% 80%, rgba(45, 212, 191, 0.12), transparent 60%),
-      linear-gradient(180deg, rgba(15, 23, 42, 0.98), rgba(2, 6, 23, 1));
+      radial-gradient(circle at 18% 20%, var(--bg-accent-1), transparent 55%),
+      radial-gradient(circle at 82% 0%, var(--bg-accent-2), transparent 60%),
+      radial-gradient(circle at 50% 85%, var(--bg-accent-3), transparent 60%);
     background-attachment: fixed;
+    transition: background-color 250ms ease, color 250ms ease;
   }
 
   ::selection {
-    background-color: rgba(56, 189, 248, 0.35);
-    color: #f8fafc;
+    background-color: var(--accent);
+    color: var(--text-inverse);
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply rounded-3xl border border-slate-800/60 bg-slate-900/60 backdrop-blur-2xl shadow-2xl shadow-slate-950/30;
+    @apply rounded-3xl backdrop-blur-2xl transition-colors duration-300;
+    background-color: var(--surface);
+    border: 1px solid var(--border-soft);
+    box-shadow: var(--shadow-soft);
   }
 
   .pill-button {
-    @apply rounded-full border border-slate-800/70 bg-slate-900/60 px-4 py-2 text-sm font-medium text-slate-300 transition-all duration-300 hover:-translate-y-0.5 hover:text-white hover:border-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-500/60 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950;
+    @apply rounded-full px-4 py-2 text-xs font-semibold uppercase tracking-[0.28em] transition;
+    background-color: var(--surface-soft);
+    border: 1px solid var(--border-soft);
+    color: var(--text-muted);
+  }
+
+  .pill-button:hover,
+  .pill-button:focus-visible {
+    color: var(--text-primary);
+    background-color: var(--pill-hover);
   }
 
   .pill-button--active {
-    @apply bg-gradient-to-r from-sky-500 to-cyan-400 text-slate-950 font-semibold shadow-lg shadow-sky-500/30;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent-soft) 100%);
+    border-color: transparent;
+    color: var(--text-inverse);
+    box-shadow: 0 20px 45px rgba(14, 165, 233, 0.35);
   }
 }
+
+@layer utilities {
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  .text-strong {
+    color: var(--text-strong);
+  }
+
+  .text-muted {
+    color: var(--text-muted);
+  }
+
+  .text-inverse {
+    color: var(--text-inverse);
+  }
+
+  .border-soft {
+    border-color: var(--border-soft);
+  }
+
+  .border-strong {
+    border-color: var(--border-strong);
+  }
+
+  .bg-surface {
+    background-color: var(--surface);
+  }
+
+  .bg-surface-soft {
+    background-color: var(--surface-soft);
+  }
+
+  .bg-surface-strong {
+    background-color: var(--surface-strong);
+  }
+
+  .bg-accent {
+    background-color: var(--accent);
+  }
+
+  .bg-accent-soft {
+    background-color: var(--accent-soft);
+  }
+
+  .shadow-soft {
+    box-shadow: var(--shadow-soft);
+  }
+}
+
+
