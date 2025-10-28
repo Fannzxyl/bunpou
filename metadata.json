@@ -1,0 +1,5 @@
+{
+  "name": "Japanese Grammar & Vocab Memorizer",
+  "description": "An interactive web application designed to help users memorize essential Japanese grammar (bunpou) and vocabulary for the TKA exam, based on a provided study guide. It features flashcard-style learning for both grammar points and vocabulary words.",
+  "requestFramePermissions": []
+}
